@@ -1,0 +1,40 @@
+From f5f64df808b35969794ba3ea8c19079276aa0cb0 Mon Sep 17 00:00:00 2001
+From: Lumir Balhar <lbalhar@redhat.com>
+Date: Thu, 4 Apr 2024 11:11:38 +0200
+Subject: [PATCH] Skip test_feedparser_data if lxml_html_clean is not available
+
+This is useful mostly for distributors shipping lxml without
+lxml_html_clean.
+---
+ src/lxml/html/tests/test_feedparser_data.py | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/src/lxml/html/tests/test_feedparser_data.py b/src/lxml/html/tests/test_feedparser_data.py
+index 36fba1acb..264c0d4b5 100644
+--- a/src/lxml/html/tests/test_feedparser_data.py
++++ b/src/lxml/html/tests/test_feedparser_data.py
+@@ -9,7 +9,11 @@
+ from lxml.tests.common_imports import doctest
+ from lxml.doctestcompare import LHTMLOutputChecker
+ 
+-from lxml.html.clean import clean, Cleaner
++try:
++    from lxml.html.clean import clean, Cleaner
++    html_clean_available = True
++except ImportError:
++    html_clean_available = False
+ 
+ feed_dirs = [
+     os.path.join(os.path.dirname(__file__), 'feedparser-data'),
+@@ -80,6 +84,11 @@ def shortDescription(self):
+ 
+ def test_suite():
+     suite = unittest.TestSuite()
++
++    if not html_clean_available:
++        print("Skipping tests in feedparser_data - external lxml_html_clean package is not installed")
++        return suite
++
+     for dir in feed_dirs:
+         for fn in os.listdir(dir):
+             fn = os.path.join(dir, fn)
