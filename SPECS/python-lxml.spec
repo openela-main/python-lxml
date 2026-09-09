@@ -2,7 +2,7 @@
 
 Name:           python-%{modname}
 Version:        4.6.5
-Release:        3%{?dist}
+Release:        3%{?dist}.1
 Summary:        XML processing library combining libxml2/libxslt with the ElementTree API
 
 # The lxml project is licensed under BSD
@@ -20,6 +20,15 @@ Source0:        %{pypi_source %{modname}}
 # https://github.com/lxml/lxml/commit/c742576c105f40fc8b754fcae56fee4aa35840a3
 # Tracking bugzilla: https://bugzilla.redhat.com/show_bug.cgi?id=2107571
 Patch0:         CVE-2022-2309.patch
+
+# Fix test_elementtree with Expat where CVE fixes changed behavior
+# Backported from https://github.com/lxml/lxml/commit/3ccc7d583e325ceb0ebdf8fc295bbb7fc8cd404d
+# without the check for the version of expat.
+Patch1:         Fix-test_elementtree-with-newer-expat.patch
+
+# Fix for CVE-2026-49825
+# https://github.com/lxml/lxml/commit/5927a6d5e851845140975d99b65461e255caaab0
+Patch2:         CVE-2026-49825.patch
 
 BuildRequires:  gcc
 BuildRequires:  libxml2-devel
@@ -73,6 +82,10 @@ cp -a build/lib.%{python3_platform}-%{python3_version}/* src/
 %{python3_sitearch}/%{modname}-*.egg-info/
 
 %changelog
+* Mon Aug 31 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 4.6.5-3.1
+- Security fix for CVE-2026-49825
+- Resolves: RHEL-251499
+
 * Wed Jul 27 2022 Charalampos Stratakis <cstratak@redhat.com> - 4.6.5-3
 - Security fix for CVE-2022-2309
 - Resolves: rhbz#2107571
